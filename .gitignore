@@ -1,0 +1,18 @@
+# Environment variables
+.env
+# Python packages and cache
+.venv/
+__pycache__/
+.ipynb_checkpoints/^
+
+# Compiled documents
+thesis/*.pdf
+thesis/packages
+
+data/webscraping/
+data/_raw/
+notebooks/data_preparation.ipynb
+
+experiments/*
+!experiments/.gitkeep
+!experiments/*.json.gz

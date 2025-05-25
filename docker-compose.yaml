@@ -1,0 +1,17 @@
+name: "random-qa"
+services:
+  neo4j:
+    image: neo4j:5.26-community
+    environment:
+      - NEO4J_AUTH=none
+      #- NEO4J_PLUGINS=["apoc", "graph-data-science"]
+      - http_proxy=${http_proxy}
+      - https_proxy=${https_proxy}
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j-data:/data
+
+volumes:
+  neo4j-data: {}

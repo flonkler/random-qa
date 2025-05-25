@@ -1,0 +1,877 @@
+# ======================================
+# 0-hop questions
+# ======================================
+- template_id: 1001
+  candidates: |
+    MATCH (x:Service) 
+    RETURN x.band AS band, x.rat AS rat
+  questions:
+    - Which frequency is used for the band {{ candidate.band }}?
+    - Which frequency belongs to {{ candidate.band }} used in {{ candidate.rat }}?
+  query: |
+    MATCH (x:Service)
+    WHERE x.band = "{{ candidate.band }}"
+    RETURN x.frequency AS frequency
+  answer: "{{ result | map(attribute='frequency') | first }} MHz"
+  labels: ["0-hop"]
+
+- template_id: 1002
+  candidates: |
+    MATCH (x:Service)
+    RETURN DISTINCT x.rat AS rat
+  questions:
+    - What is the highest frequency used in {{ candidate.rat }}?
+    - What is the maximum frequency used in {{ candidate.rat }}?
+  query: |
+    MATCH (x:Service)
+    WHERE x.rat = "{{ candidate.rat }}"
+    RETURN MAX(x.frequency) AS frequency
+  answer: "{{ result | map(attribute='frequency') | first }} MHz"
+  labels: ["0-hop", "constraint"]
+
+- template_id: 1003
+  candidates: |
+    MATCH (x:Service)
+    RETURN DISTINCT x.rat AS rat
+  questions:
+    - What is the lowest frequency used in {{ candidate.rat }}?
+    - What is the minimum frequency used in {{ candidate.rat }}?
+  query: |
+    MATCH (x:Service)
+    WHERE x.rat = "{{ candidate.rat }}"
+    RETURN MIN(x.frequency) AS frequency
+  answer: "{{ result | map(attribute='frequency') | first }} MHz"
+  labels: ["0-hop", "constraint"]
+
+- template_id: 1004
+  candidates: |
+    MATCH (x:Service)
+    RETURN DISTINCT x.rat AS rat
+  questions:
+    - How many frequencies are used for {{ candidate.rat }}?
+    - How many bands are used for {{ candidate.rat }}?
+  query: |
+    MATCH (x:Service)
+    WHERE x.rat = "{{ candidate.rat }}"
+    RETURN COUNT(x) AS count
+  answer: "{{ result | map(attribute='count') | first }}"
+  labels: ["0-hop", "aggregation"]
+
+- template_id: 1005
+  candidates: |
+    MATCH (m:Manufacturer)
+    RETURN DISTINCT m.country AS country
+  questions:
+    - Which manufacturers are located in {{ candidate.country }}?
+    - Which companies produce their devices in {{ candidate.country }}?
+  query: |
+    MATCH (m:Manufacturer)
+    WHERE m.country = "{{ candidate.country }}"
+    RETURN m.name AS name
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["0-hop"]
+
+- template_id: 1006
+  candidates: |
+    MATCH (m:Manufacturer)
+    RETURN m.name AS name
+  questions:
+    - Where does {{ candidate.name }} manufacturer their products?
+    - In which country is {{ candidate.name }} located?
+  query: |
+    MATCH (m:Manufacturer)
+    WHERE m.name = "{{ candidate.name }}"
+    RETURN m.country AS country
+  answer: "{{ result | map(attribute='country') | first }}"
+  labels: ["0-hop"]
+
+- template_id: 1007
+  candidates: null
+  questions:
+    - Which points of interest exist?
+    - Which POIs exist?
+    - Can you list all point of interests?
+    - Can you name all POIs?
+  query: |
+    MATCH (p:POI)
+    RETURN p.name AS name
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["0-hop"]
+
+- template_id: 1008
+  candidates: null
+  questions:
+    - How many points of interest exist?
+    - How many POIs exist?
+  query: |
+    MATCH (p:POI)
+    RETURN COUNT(p) as count
+  answer: "{{ result | map(attribute='count') | first }}"
+  labels: ["0-hop", "aggregation"]
+
+- template_id: 1009
+  candidates: null
+  questions:
+    - Which companies operate mobile communication networks in Germany?
+    - Which mobile communication providers exist in Germany?
+    - Can you name all mobile network operators in Germany?
+  query: |
+    MATCH (o:Operator)
+    RETURN o.name AS name
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["0-hop"]
+
+- template_id: 1010
+  candidates: null
+  questions:
+    - How many companies operate mobile communication networks in Germany?
+    - How many mobile communication providers exist in Germany?
+  query: |
+    MATCH (o:Operator)
+    RETURN COUNT(o) AS count
+  answer: "{{ result | map(attribute='count') | first }}"
+  labels: ["0-hop", "aggregation"]
+
+- template_id: 1011
+  candidates: null
+  questions:
+    - Which region has the highest population density?
+    - Which city district has the highest population density?
+  query: |
+    MATCH (r:Region)
+    RETURN r.name AS name, r.population_density AS density
+    ORDER BY density DESC
+    LIMIT 1
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["0-hop", "constraint"]
+
+- template_id: 1012
+  candidates: null
+  questions:
+    - Which region has the most inhabitants?
+    - Which city district has the highest population?
+  query: |
+    MATCH (r:Region)
+    RETURN r.name AS name, r.population_count AS population
+    ORDER BY population DESC
+    LIMIT 1
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["0-hop", "constraint"]
+
+- template_id: 1013
+  candidates: null
+  questions:
+    - What is the total area covered by the tiles?
+  query: |
+    MATCH (t:Tile)
+    RETURN SUM(t.area) AS totalArea
+  answer: "{{ result | map(attribute='totalArea') | first }} km²"
+  labels: ["0-hop", "aggregation"]
+
+- template_id: 1014
+  candidates: |
+    MATCH (a:MobileAntenna)
+    WHERE NOT isNaN(a.orientation)
+    RETURN a.name AS name
+  questions:
+    - What is the orientation of the antenna {{ candidate.name }}?
+    - What is the azimuth of {{ candidate.name }}?
+  query: |
+    MATCH (a:MobileAntenna)
+    WHERE a.name = "{{ candidate.name }}"
+    RETURN a.orientation AS orientation
+  answer: "{{ result | map(attribute='orientation') | first }}°"
+  labels: ["0-hop"]
+
+- template_id: 1015
+  candidates: |
+    MATCH (w:MicrowaveAntenna)
+    RETURN w.name AS name
+  questions:
+    - What is the orientation of the antenna {{ candidate.name }}?
+    - What is the azimuth of {{ candidate.name }}?
+  query: |
+    MATCH (w:MicrowaveAntenna)
+    WHERE w.name = "{{ candidate.name }}"
+    RETURN w.orientation AS orientation
+  answer: "{{ result | map(attribute='orientation') | first }}°"
+  labels: ["0-hop"]
+
+- template_id: 1016
+  candidates: |
+    MATCH (s:Site)
+    RETURN s.name AS name
+  questions:
+    - What are the coordinates of the site {{ candidate.name }}?
+    - What is the position of {{ candidate.name }}?
+  query: |
+    MATCH (s:Site)
+    WHERE s.name = "{{ candidate.name }}"
+    RETURN s.coordinates AS coordinates
+  answer: "{{ result | map(attribute='coordinates') | first }}"
+  labels: ["0-hop"]
+
+- template_id: 1017
+  candidates: |
+    MATCH (s:Site)
+    RETURN s.name AS name
+  questions:
+    - Are the antennas at the site {{ candidate.name }} mounted on a roof?
+    - Is the site {{ candidate.name }} constructed at a building?
+  query: |
+    MATCH (s:Site)
+    WHERE s.name = "{{ candidate.name }}"
+    RETURN s.construction AS constructionType
+  answer: "{% if result[0].constructionType == 'Building' %}Yes{% else %}No{% endif %}"
+  labels: ["0-hop"]
+
+- template_id: 1018
+  candidates: |
+    MATCH (s:Site)
+    RETURN s.name AS name
+  questions:
+    - Is the site {{ candidate.name }} connected via a fiber or microwave link?
+    - How is the site {{ candidate.name }} connected?
+  query: |
+    MATCH (s:Site)
+    WHERE s.name = "{{ candidate.name }}"
+    RETURN s.connection AS connectionType
+  answer: "{% if result[0].connectionType == 'Fiber' %}Fiber connection{% else %}Microwave connection{% endif %}"
+  labels: ["0-hop"]
+
+- template_id: 1019
+  candidates: |
+    MATCH (s:Site)
+    RETURN DISTINCT s.construction AS constructionType
+  questions:
+    - What is the percentage of sites with the construction type "{{ candidate.constructionType }}"?
+    - How many sites are categorized as "{{ candidate.constructionType }}" in percent?
+  query: |
+    MATCH (s:Site)
+    WITH s.construction AS constructionType, count(*) AS count
+    MATCH (s:Site)
+    WITH constructionType, count, count(*) AS totalCount
+    WHERE constructionType = "{{ candidate.constructionType }}"
+    RETURN 100.0 * count / totalCount AS percentage
+  answer: "{{ result | map(attribute='percentage') | first }}%"
+  labels: ["0-hop", "aggregation"]
+
+- template_id: 1020
+  candidates: null
+  questions:
+    - What are the five largest regions in Leipzig?
+    - Can you name the 5 largest districts in Leipzig?
+  query: |
+    MATCH (r:Region)
+    RETURN r.name AS name
+    ORDER BY r.area LIMIT 5
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["0-hop", "constraint"]
+
+- template_id: 1021
+  candidates: null
+  questions:
+    - What is the most common connection type?
+    - Which link is most often used for sites?
+  query: |
+    MATCH (s:Site)
+    WITH s.connection AS connectionType, COUNT(*) AS count
+    RETURN connectionType
+    ORDER BY count DESC LIMIT 1
+  answer: "{{ result | map(attribute='connectionType') | first }} connection"
+  labels: ["0-hop", "aggregation", "constraint"]
+
+- template_id: 1022
+  candidates: null
+  questions:
+    - What is the least common construction type of sites?
+    - Which site construction is the rarest?
+  query: |
+    MATCH (s:Site)
+    WITH s.construction AS constructionType, COUNT(*) AS count
+    RETURN constructionType
+    ORDER BY count LIMIT 1
+  answer: "{{ result | map(attribute='constructionType') | first }}"
+  labels: ["0-hop", "aggregation", "constraint"]
+
+- template_id: 1023
+  candidates: UNWIND [1, 2, 3] AS value RETURN value
+  questions:
+    - Which frequency bands lie above {{ candidate.value * 1000 }} MHz?
+    - Which bands use frequencies above {{ candidate.value }} GHz?
+  query: |
+    MATCH (x:Service)
+    WHERE x.frequency > {{ candidate.value * 1000 }}
+    RETURN x.band AS band
+  answer: "{{ result | map(attribute='band') | human_readable_list }}"
+  labels: ["0-hop", "constraint"]
+
+- template_id: 1024
+  candidates: null
+  questions:
+    - How many users are served by a cell on average?
+    - What is the mean user count of a cell?
+  query: |
+    MATCH (c:Cell)
+    RETURN AVG(c.user_count) AS average
+  answer: "{{ result | map(attribute='average') | first }}"
+  labels: ["0-hop", "aggregation"]
+
+# ======================================
+# 1-hop questions
+# ======================================
+- template_id: 1101
+  candidates: |
+    MATCH (s:Site) 
+    RETURN s.name AS siteName
+  questions:
+    - In which region is the site {{ candidate.siteName }} located?
+    - Where is the site {{ candidate.siteName }} located in?
+  query: |
+    MATCH (s:Site)-[:LOCATED_IN]->(r:Region)
+    WHERE s.name = "{{ candidate.siteName }}"
+    RETURN r.name AS regionName
+  answer: "{{ result | map(attribute='regionName') | first }}"
+  labels: ["1-hop"]
+
+- template_id: 1102
+  candidates: null
+  questions:
+    - How many sites are in the region with the largest area?
+    - What is the amount of sites in the largest region?
+  query: |
+    MATCH (r:Region)
+    WITH r ORDER BY r.area DESC LIMIT 1
+    MATCH (s:Site)-[:LOCATED_IN]->(r:Region)
+    RETURN COUNT(s) AS count
+  answer: "{{ result | map(attribute='count') | first }}"
+  labels: ["1-hop", "aggregation", "constraint"]
+
+- template_id: 1103
+  candidates: |
+    MATCH (s:Site)
+    RETURN s.name as siteName
+  questions:
+    - How many mobile antennas and microwave antennas are installed at {{ candidate.siteName }}?
+    - How many antennas are installed at the site {{ candidate.siteName }}?
+  query: |
+    MATCH (n:MobileAntenna|MicrowaveAntenna)-[:INSTALLED_AT]->(s:Site)
+    WHERE s.name = "{{ candidate.siteName }}"
+    RETURN COUNT(n) AS count
+  answer: "{{ result | map(attribute='count') | first }}"
+  labels: ["1-hop", "aggregation"]
+
+- template_id: 1104
+  candidates:
+    MATCH (a:MobileAntenna)
+    RETURN a.name as antennaName
+  questions:
+    - Who is the operator of the antenna {{ candidate.antennaName }}?
+    - Which company operates {{ candidate.antennaName }}?
+  query: |
+    MATCH (a:MobileAntenna)-[:OPERATED_BY]->(o:Operator)
+    WHERE a.name = "{{ candidate.antennaName }}"
+    RETURN o.name AS name
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["1-hop"]
+
+- template_id: 1105
+  candidates: null
+  questions:
+    - Which manufacturer produces the most antennas?
+    - What is the company that manufactures the most radio equipment?
+  query: |
+    MATCH (n:MobileAntenna|MicrowaveAntenna)-[:PRODUCED_BY]->(m:Manufacturer)
+    WITH m, COUNT(n) AS antennaCount
+    RETURN m.name AS name
+    ORDER BY antennaCount DESC LIMIT 1
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["1-hop", "constraint", "aggregation"]
+
+- template_id: 1106
+  candidates: |
+    MATCH (w:MicrowaveAntenna)
+    RETURN w.name AS antennaName
+  questions:
+    - What is the name of the microwave antenna that is connected with {{ candidate.antennaName }}?
+    - With which other microwave antenna does {{ candidate.antennaName }} transmit data?
+  query: |
+    MATCH (w1:MicrowaveAntenna)-[:CONNECTED_WITH]->(w2:MicrowaveAntenna)
+    WHERE w1.name = "{{ candidate.antennaName }}"
+    RETURN w2.name AS name
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["1-hop"]
+
+- template_id: 1107
+  candidates: |
+    MATCH (r:Region)
+    RETURN r.name AS regionName
+  questions:
+    - How many sites are within {{ candidate.regionName }}?
+    - How many base stations exist in {{ candidate.regionName }}?
+  query: |
+    MATCH (s:Site)-[:LOCATED_IN]->(r:Region)
+    WHERE r.name = "{{ candidate.regionName }}"
+    RETURN COUNT(s) AS siteCount
+  answer: "{{ result | map(attribute='siteCount') | first }}"
+  labels: ["1-hop", "aggregation"]
+
+- template_id: 1108
+  candidates: null
+  questions:
+    - Which antenna serves the most users in total?
+    - What is the most important antenna in terms of served users?
+  query: |
+    MATCH (c:Cell)-[:SERVED_BY]->(a:MobileAntenna)
+    WITH a, SUM(c.user_count) AS totalUserCount
+    RETURN a.name AS name
+    ORDER BY totalUserCount DESC LIMIT 1
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["1-hop", "constraint", "aggregation"]
+
+- template_id: 1109
+  candidates: |
+    MATCH (a:MobileAntenna)<-[:SERVED_BY]-(c:Cell)
+    WHERE c.area > 0
+    RETURN DISTINCT a.name AS antennaName
+  questions:
+    - Which cell of the antenna {{ candidate.antennaName }} covers the largest area?
+    - What is the largest cell of {{ candidate.antennaName }}?
+  query: |
+    MATCH (c:Cell)-[:SERVED_BY]->(a:MobileAntenna)
+    WHERE a.name = "{{ candidate.antennaName }}"
+    RETURN c.name AS name
+    ORDER BY c.area DESC LIMIT 1
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["1-hop", "constraint"]
+
+- template_id: 1110
+  candidates: |
+    MATCH (c:Cell)
+    RETURN c.name AS cellName
+  questions:
+    - Which radio access technology is available in the cell {{ candidate.cellName }}?
+    - Which RAT has {{ candidate.cellName }}?
+  query: |
+    MATCH (x:Service)-[:AVAILABLE_IN]->(c:Cell)
+    WHERE c.name = "{{ candidate.cellName }}"
+    RETURN x.rat AS rat
+  answer: "{{ result | map(attribute='rat') | first }}"
+  labels: ["1-hop"]
+
+- template_id: 1111
+  candidates: null
+  questions:
+    - In which region are the most points of interest?
+    - What region contains the most POIs?
+  query: |
+    MATCH (p:POI)-[:LOCATED_IN]->(r:Region)
+    WITH r, COUNT(p) AS count
+    RETURN r.name AS name, count
+    ORDER BY count DESC LIMIT 1
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["1-hop", "aggregation", "constraint"]
+
+- template_id: 1112
+  candidates: |
+    MATCH (p:POI)-[:LOCATED_IN]->(r:Region)
+    RETURN DISTINCT r.name AS regionName
+  questions:
+    - Which points of interest are located in the region {{ candidate.regionName }}?
+    - Can you name all POIs within {{ candidate.regionName }}?
+  query: |
+    MATCH (p:POI)-[:LOCATED_IN]->(r:Region)
+    WHERE r.name = "{{ candidate.regionName }}"
+    RETURN p.name AS name
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["1-hop"]
+
+- template_id: 1113
+  candidates: |
+    MATCH (t:Tile)-[:COVERED_BY]->(c:Cell)
+    RETURN DISTINCT t.name as tileName
+  questions:
+    - Which cells cover the tile {{ candidate.tileName }}?
+    - What are the names of the cells covering the area {{ candidate.tileName }}?
+  query: |
+    MATCH (t:Tile)-[:COVERED_BY]->(c:Cell)
+    WHERE t.name = "{{ candidate.tileName }}"
+    RETURN c.name as name
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["1-hop"]
+
+- template_id: 1114
+  candidates: UNWIND [1, 2, 3] AS value RETURN value
+  questions:
+    - How many sites have more than {{ candidate.value }} operators?
+    - How many base stations are operated by more than {{ candidate.value }} MNOs?
+  query: |
+    MATCH (s:Site)-[:OPERATED_BY]->(o:Operator)
+    WITH s, COUNT(o) AS operatorCount
+    WHERE operatorCount > {{ candidate.value }}
+    RETURN COUNT(s) AS count
+  answer: "{{ result | map(attribute='count') | first}}"
+  labels: ["1-hop", "aggregation", "constraint"]
+
+- template_id: 1115
+  candidates: null
+  questions:
+    - How many tiles does a cell cover on average?
+    - What is the average amount of tiles that are associated with a cell?
+  query: |
+    MATCH (t:Tile)-[:COVERED_BY]->(c:Cell)
+    WITH c, COUNT(t) AS tileCount
+    RETURN AVG(tileCount) AS average
+  answer: "{{ result | map(attribute='average') | first }}"
+  labels: ["1-hop", "aggregation"]
+
+- template_id: 1116
+  candidates: |
+    MATCH (w:MicrowaveAntenna)
+    RETURN w.name AS antennaName
+  questions:
+    - What is the manufacturer of the antenna {{ candidate.antennaName }}?
+    - Who produces {{ candidate.antennaName }}?
+  query: |
+    MATCH (w:MicrowaveAntenna)-[:PRODUCED_BY]->(m:Manufacturer)
+    WHERE w.name = "{{ candidate.antennaName }}"
+    RETURN m.name AS name
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["1-hop"]
+
+- template_id: 1117
+  candidates: |
+    MATCH (s:Site)-[:OPERATED_BY]->(o:Operator)
+    WITH s, COUNT(o) AS operatorCount
+    WHERE operatorCount = 1
+    RETURN s.name AS siteName
+  questions:
+    - What are the orientations of the antennas installed at the site {{ candidate.siteName }}?
+    - Which sectors are present at {{ candidate.siteName }}?
+  query: |
+    MATCH (a:MobileAntenna)-[:INSTALLED_AT]->(s:Site)
+    WHERE s.name = "{{ candidate.siteName }}"
+    RETURN DISTINCT a.orientation AS orientation
+  answer: "{{ result | map(attribute='orientation') | sort | map_format('%d°') | human_readable_list }}"
+  labels: ["1-hop", "constraint"]
+
+- template_id: 1118
+  candidates: |
+    MATCH (p:POI)<-[:NEAR_BY]-(s:Site)
+    RETURN p.name AS poiName
+  questions:
+    - Which sites are near by the point of interest {{ candidate.poiName }}?
+    - Which sites are close to {{ candidate.poiName }}?
+  query: |
+    MATCH (s:Site)-[:NEAR_BY]->(p:POI)
+    WHERE p.name = "{{ candidate.poiName }}"
+    RETURN s.name AS name
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["1-hop"]
+
+- template_id: 1119
+  candidates: |
+    MATCH (s:Site)
+    RETURN s.name AS siteName
+  questions:
+    - Who operates the site {{ candidate.siteName }}?
+    - Which MNOs does {{ candidate.siteName }} belong to?
+  query: |
+    MATCH (s:Site)-[:OPERATED_BY]->(o:Operator)
+    WHERE s.name = "{{ candidate.siteName }}"
+    RETURN o.name AS name
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["1-hop"]
+
+# ======================================
+# 2-hop questions
+# ======================================
+- template_id: 1201
+  candidates: |
+    MATCH (s:Site)<-[:INSTALLED_AT]-(a:MobileAntenna)
+    WITH s, COUNT(a) AS antCount
+    WHERE antCount > 10
+    RETURN s.name AS siteName
+  questions:
+    - Which manufacturers produce the antennas that are installed at the site {{ candidate.siteName }}?
+    - Who manufactures the equipment at the site {{ candidate.siteName }}?
+  query: |
+    MATCH (m:Manufacturer)<-[:PRODUCED_BY]-(:MobileAntenna|MicrowaveAntenna)-[:INSTALLED_AT]->(s:Site)
+    WHERE s.name = "{{ candidate.siteName }}"
+    RETURN DISTINCT m.name AS name
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["2-hop", "constraint"]
+
+- template_id: 1202
+  candidates: |
+    MATCH (t:Tile)-[:COVERED_BY]->(c:Cell)
+    RETURN DISTINCT t.name as tileName
+  questions:
+    - Which technologies are available in the tile {{ candidate.tileName }}?
+    - Which RATs can be used in the area {{ candidate.tileName }}?
+  query: |
+    MATCH (x:Service)-[:AVAILABLE_IN]->(c:Cell)<-[:COVERED_BY]-(t:Tile)
+    WHERE t.name = "{{ candidate.tileName }}"
+    RETURN DISTINCT x.rat AS rat
+  answer: "{{ result | map(attribute='rat') | human_readable_list }}"
+  labels: ["2-hop", "constraint"]
+
+- template_id: 1203
+  candidates: |
+    MATCH (o:Operator)
+    RETURN o.name AS operatorName
+  questions:
+    - What is the highest amount of antennas operated by {{ candidate.operatorName }} at a site?
+    - How many antennas are installed at the largest site of {{ candidate.operatorName }} have?
+  query: |
+    MATCH (n:MobileAntenna|MicrowaveAntenna)-[:INSTALLED_AT]->(s:Site)
+    MATCH (n)-[:OPERATED_BY]->(o:Operator)
+    WHERE o.name = "{{ candidate.operatorName }}"
+    WITH s, COUNT(n) AS count
+    RETURN count
+    ORDER BY count DESC LIMIT 1
+  answer: "{{ result | map(attribute='count') | first }}"
+  labels: ["2-hop", "constraint", "aggregation"]
+
+- template_id: 1204
+  candidates: |
+    MATCH (s:Site)-[:LOCATED_IN]->(r:Region)
+    WITH r, COUNT(s) AS siteCount
+    WHERE siteCount > 6
+    RETURN r.name AS regionName
+  questions:
+    - Which two MNOs operate the most sites in the region {{ candidate.regionName }}?
+    - What are the two most common operators in {{ candidate.regionName }}?
+  query: |
+    MATCH (s:Site)-[:OPERATED_BY]->(o:Operator)
+    MATCH (s:Site)-[:LOCATED_IN]->(r:Region)
+    WHERE r.name = "{{ candidate.regionName }}"
+    WITH o, COUNT(s) AS siteCount
+    RETURN o.name AS name
+    ORDER BY siteCount DESC LIMIT 2
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["2-hop", "constraint", "aggregation"]
+
+- template_id: 1205
+  candidates: |
+    MATCH (s:Site)-[:NEAR_BY]->(:POI)-[:LOCATED_IN]->(r:Region)
+    RETURN s.name AS siteName, r.name AS regionName
+  questions:
+    - Which point of interest is located in {{ candidate.regionName }} and near the site {{ candidate.siteName }}?
+    - What is the name of POI in {{ candidate.regionName }} that is also close to {{ candidate.siteName }}?
+  query: |
+    MATCH (s:Site)-[:NEAR_BY]->(p:POI)-[:LOCATED_IN]->(r:Region)
+    WHERE r.name = "{{ candidate.regionName }}" AND s.name = "{{ candidate.siteName }}"
+    RETURN p.name AS name
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["2-hop"]
+
+- template_id: 1206
+  candidates: |
+    MATCH (a:MobileAntenna)<-[:SERVED_BY]-(:Cell)
+    RETURN DISTINCT a.name AS antennaName
+  questions:
+    - Which frequencies are used by the antenna {{ candidate.antennaName }}?
+    - On which frequencies does the antenna {{ candidate.antennaName }} operate?
+  query: |
+    MATCH (x:Service)-[:AVAILABLE_IN]->(:Cell)-[:SERVED_BY]->(a:MobileAntenna)
+    WHERE a.name = "{{ candidate.antennaName }}"
+    RETURN DISTINCT x.frequency AS frequency
+  answer: "{{ result | map(attribute='frequency') | sort | map_format('%d MHz') | human_readable_list }}"
+  labels: ["2-hop", "constraint"]
+
+- template_id: 1207
+  candidates: |
+    MATCH (a:MobileAntenna|MicrowaveAntenna)-[:INSTALLED_AT]->(s:Site)
+    WITH s, COUNT(a) AS antennaCount
+    WHERE antennaCount > 9
+    RETURN s.name AS siteName
+  questions:
+    - The antennas installed at {{ candidate.siteName }} are produced by how many different manufacturers?
+    - How many manufacturers are present at the site {{ candidate.siteName }}?
+  query: |
+    MATCH (s:Site)<-[:INSTALLED_AT]-()-[:PRODUCED_BY]->(m:Manufacturer)
+    WHERE s.name = "{{ candidate.siteName }}"
+    WITH DISTINCT m
+    RETURN COUNT(m) AS count
+  answer: "{{ result | map(attribute='count') | first }}"
+  labels: ["2-hop", "aggregation"]
+
+- template_id: 1208
+  candidates: |
+    MATCH (t:Tile)-[:COVERED_BY]->(c:Cell)
+    MATCH (t:Tile)-[:LOCATED_IN]->(r:Region)
+    RETURN DISTINCT c.name AS cellName, r.name AS regionName
+  questions:
+    - What is the total area covered by the cell {{ candidate.cellName }} within the region {{ candidate.regionName }}?
+    - How much area of {{ candidate.regionName }} is covered by {{ candidate.cellName }} in square kilometers?
+  query: |
+    MATCH (t:Tile)-[:COVERED_BY]->(c:Cell)
+    MATCH (t:Tile)-[:LOCATED_IN]->(r:Region)
+    WHERE r.name = "{{ candidate.regionName }}" AND c.name = "{{ candidate.cellName }}"
+    RETURN SUM(t.area) as area
+  answer: "{{ result | map(attribute='area') | first }} km²"
+  labels: ["2-hop", "aggregation"]
+
+- template_id: 1209
+  candidates: |
+    MATCH (w:MicrowaveAntenna)
+    RETURN w.name AS antennaName
+  questions:
+    - At which site is the microwave antenna installed that is connected with {{ candidate.antennaName }}?
+    - Where is the counterpart of {{ candidate.antennaName }} installed?
+  query: |
+    MATCH (w:MicrowaveAntenna)-[:CONNECTED_WITH]->(:MicrowaveAntenna)-[:INSTALLED_AT]->(s:Site)
+    WHERE w.name = "{{ candidate.antennaName }}"
+    RETURN s.name AS name
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["2-hop"]
+
+- template_id: 1210
+  candidates: null
+  questions:
+    - What is the name of the site with the most amount of cells?
+    - Which site serves the most cells?
+  query: |
+    MATCH (c:Cell)-[:SERVED_BY]->(:MobileAntenna)-[:INSTALLED_AT]->(s:Site)
+    WITH s, COUNT(c) AS cellCount
+    RETURN s.name AS name
+    ORDER BY cellCount DESC LIMIT 1
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["2-hop", "constraint", "aggregation"]
+  
+# ======================================
+# multi-hop questions
+# ======================================
+- template_id: 1901
+  candidates: |
+    MATCH (r:Region)
+    RETURN r.name AS regionName
+  questions:
+    - Which is the most common manufacturer of antennas within the region {{ candidate.regionName }}?
+  query: |
+    MATCH (n:MobileAntenna|MicrowaveAntenna)-[:INSTALLED_AT]->(:Site)-[:LOCATED_IN]->(r:Region)
+    MATCH (n)-[:PRODUCED_BY]->(m:Manufacturer)
+    WHERE r.name = "{{ candidate.regionName }}"
+    WITH m, COUNT(n) AS antennaCount
+    RETURN m.name AS name
+    ORDER BY antennaCount DESC
+    LIMIT 1
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["multi-hop", "aggregation", "constraint"]
+
+- template_id: 1902
+  candidates: |
+    MATCH (s:Site)-[:NEAR_BY]->(p:POI)-[:LOCATED_IN]->(r2:Region)
+    MATCH (s:Site)-[:LOCATED_IN]->(r1:Region)
+    WHERE r1 <> r2
+    RETURN DISTINCT p.name AS poiName
+  questions:
+    - Which sites are near {{ candidate.poiName }} but not in the same region as this point of interest?
+    - What are the names of the sites close to the POI {{ candidate.poiName }} but lie in a different administrative zone?
+  query: |
+    MATCH (s:Site)-[:NEAR_BY]->(p:POI)-[:LOCATED_IN]->(r2:Region)
+    MATCH (s:Site)-[:LOCATED_IN]->(r1:Region)
+    WHERE r1 <> r2 AND p.name = "{{ candidate.poiName }}"
+    RETURN s.name AS name
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["multi-hop"]
+
+- template_id: 1903
+  candidates: |
+    MATCH (root:Site)<-[:CONNECTION_PROVIDED_BY]-{1,3}(leaf:Site)
+    WHERE root.connection = "Fiber"
+    RETURN root.name AS rootSiteName, leaf.name AS leafSiteName
+  questions:
+    - Which antennas are used for the microwave link from the site {{ candidate.rootSiteName }} to {{ candidate.leafSiteName }}?
+    - Which antennas are involved for the connection between {{ candidate.rootSiteName }} and {{ candidate.leafSiteName }}?
+  query: |
+    MATCH (root:Site)((:Site)<-[:INSTALLED_AT]-(w1:MicrowaveAntenna)-[:CONNECTED_WITH]->(w2:MicrowaveAntenna)-[:INSTALLED_AT]->(:Site)){1,}(leaf:Site)
+    WHERE root.name = "{{ candidate.rootSiteName }}" AND leaf.name = "{{ candidate.leafSiteName }}"
+    UNWIND w1 + w2 AS antennas
+    RETURN antennas.name AS name
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["multi-hop"]
+
+- template_id: 1904
+  candidates: |
+    MATCH (root:Site)<-[:CONNECTION_PROVIDED_BY]-{2,3}(leaf:Site)
+    WHERE root.connection = "Fiber"
+    RETURN root.name AS rootSiteName
+  questions:
+    - Which sites have a microwave link chain whose root site is {{ candidate.rootSiteName }}?
+    - Which sites would have no connection if there is an outage of {{ candidate.rootSiteName }}?
+  query: |
+    MATCH (root:Site)<-[:CONNECTION_PROVIDED_BY*]-(s:Site)
+    WHERE root.name = "{{ candidate.rootSiteName }}"
+    RETURN s.name AS name
+  answer: "{{ result | map(attribute='name') | human_readable_list }}"
+  labels: ["multi-hop"]
+
+- template_id: 1905
+  candidates: |
+    MATCH (o:Operator), (x:Service)
+    RETURN DISTINCT o.name AS operatorName, x.rat AS rat
+  questions:
+    - What is the total coverage with {{ candidate.rat }} service provided by {{ candidate.operatorName }} in percent?
+    - What is the overall {{ candidate.rat }} coverage of {{ candidate.operatorName }} in percent?
+  query: |
+    MATCH (t:Tile)-[:COVERED_BY]->(c:Cell)
+    MATCH (x:Service)-[:AVAILABLE_IN]->(c:Cell)
+    MATCH (c:Cell)-[:SERVED_BY]->(:MobileAntenna)-[:OPERATED_BY]->(o:Operator)
+    WHERE x.rat = "{{ candidate.rat }}" AND o.name = "{{ candidate.operatorName }}"
+    WITH DISTINCT t AS coveredTiles
+    WITH SUM(coveredTiles.area) AS coveredArea
+    MATCH (t:Tile)
+    WITH coveredArea, SUM(t.area) AS totalArea
+    RETURN 100 * coveredArea / totalArea AS percentage
+  answer: "{{ result | map(attribute='percentage') | first }}%"
+  labels: ["multi-hop", "aggregation"]
+
+- template_id: 1906
+  candidates: |
+    MATCH (r:Region)<-[:LOCATED_IN]-(s:Site)
+    RETURN DISTINCT r.name AS regionName
+  questions:
+    - What is the name of the cell with the highest user count that belongs to a site within the region {{ candidate.regionName }}?
+    - Which cell associated with a site in {{ candidate.regionName }} is the most important in terms of user count?
+  query: |
+    MATCH (c:Cell)-[:SERVED_BY]->(:MobileAntenna)-[:INSTALLED_AT]->(:Site)-[:LOCATED_IN]->(r:Region)
+    WHERE r.name = "{{ candidate.regionName }}"
+    RETURN c.name AS name
+    ORDER BY c.user_count DESC LIMIT 1
+  answer: "{{ result | map(attribute='name') | first }}"
+  labels: ["multi-hop", "constraint"]
+
+- template_id: 1907
+  candidates: null
+  questions:
+    - What is the average amount of services at a site for each operator?
+    - How many frequency bands do operators actively use at a site on average?
+  query: |
+    MATCH (x:Service)-[:AVAILABLE_IN]->(:Cell)-[:SERVED_BY]->(a:MobileAntenna)-[:INSTALLED_AT]->(s:Site)
+    MATCH (a:MobileAntenna)-[:OPERATED_BY]->(o:Operator)
+    WITH o, s, a, COUNT(x) AS serviceCount
+    RETURN o.name AS name, AVG(serviceCount) AS average
+  answer: |
+    {%- for item in result -%}
+      {{ item.name }} {{ item.average }}
+      {%- if not loop.last %}, {% endif -%}
+    {%- endfor -%}
+  labels: ["multi-hop", "aggregation"]
+
+- template_id: 1908
+  candidates: |
+    MATCH (p:POI)
+    RETURN p.name AS poiName
+  questions:
+    - Which services are available at the point of interest {{ candidate.poiName }}?
+    - Which RATs are provided for the POI {{ candidate.poiName }}?
+  query: |
+    MATCH (p:POI)-[:LOCATED_IN]->(t:Tile)-[:COVERED_BY]->(c:Cell)
+    MATCH (x:Service)-[:AVAILABLE_IN]->(c:Cell)
+    WHERE p.name = "{{ candidate.poiName }}"
+    RETURN DISTINCT x.rat AS rat
+  answer: "{{ result | map(attribute='rat') | human_readable_list }}"
+  labels: ["multi-hop", "constraint"]
+    
