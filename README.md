@@ -3,19 +3,19 @@
 > [!NOTE]  
 > Link to the published thesis will be added after the review of the supervisors.
 
-This repository contains the source code, datasets and results used in my master's thesis "RANDOM-QA: Question Answering mit Large Language Models und Knowledge Graphs für die Radio-Access-Network-Domäne".
+This repository contains the source code, datasets and results of my master's thesis _"RANDOM-QA: Question Answering mit Large Language Models und Knowledge Graphs für die Radio-Access-Network-Domäne"_.
 
 ## Repository structure
 
 | Folder/File | Usage |
 | ----------- | ----- |
-| 📁 data/ | Datasets used to generate the Knowledge Graph and the evaluation dataset |
-| 📁 experiments/ | Results of the conducted experiments (metrics, outputs, etc.) |
-| 📁 notebooks/ | Jupyter notebooks to create visualization, analyze results and interact with the implementation |
-| 📁 random_qa/ | Implementation of the KGQA system and helper functions |
-| 📄 .env | General environment variables (e.g., API keys) for the project |
-| 📄 docker-compose.yaml | Configuration of the Neo4j Docker container |
-| 📄 requirements.txt | List of all Python dependencies |
+| 📁 `data/` | Datasets used to generate the Knowledge Graph and the evaluation dataset |
+| 📁 `experiments/` | Results of the conducted experiments (metrics, outputs, etc.) |
+| 📁 `notebooks/` | Jupyter notebooks to create visualization, analyze results and interact with the implementation |
+| 📁 `random_qa/` | Implementation of the KGQA system and helper functions |
+| 📄 `.env` | General environment variables (e.g., API keys) for the project |
+| 📄 `docker-compose.yaml` | Configuration of the Neo4j Docker container |
+| 📄 `requirements.txt` | List of all Python dependencies |
 
 ## Setup
 
